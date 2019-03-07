@@ -1,0 +1,32 @@
+{
+  "name": "osc-apidb-writer",
+  "version": "1.0.0",
+  "description": "Module for writing OSC files (OpenStreetMap changefile format) into an OSM API postgresql database",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vitalymil/osc-apidb-writer.git"
+  },
+  "keywords": [
+    "osm",
+    "openstreetmap",
+    "osc",
+    "postgresql",
+    "postgres",
+    "pg",
+    "apidb",
+    "api"
+  ],
+  "author": "vitaly mil",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vitalymil/osc-apidb-writer/issues"
+  },
+  "homepage": "https://github.com/vitalymil/osc-apidb-writer#readme",
+  "dependencies": {
+    "pg": "^7.8.1"
+  }
+}
