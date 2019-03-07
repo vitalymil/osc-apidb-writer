@@ -1,7 +1,7 @@
 {
-  "name": "osc-apidb-writer",
+  "name": "osm-apidb-writer",
   "version": "1.0.0",
-  "description": "Module for writing OSC files (OpenStreetMap changefile format) into an OSM API postgresql database",
+  "description": "Module for writing OSC and OSM files (OpenStreetMap file format) into an OSM API postgresql database",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

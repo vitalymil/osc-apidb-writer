@@ -50,3 +50,5 @@ class ApidbBulkWriter {
         }
     }
 }
+
+module.exports = ApidbBulkWriter;

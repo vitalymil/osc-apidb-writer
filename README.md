@@ -1,2 +1,2 @@
-# osc-apidb-writer
-Module for writing OSC files (OpenStreetMap changefile format) into an OSM API postgresql database
+# osm-apidb-writer
+Module for writing OSC and OSM files (OpenStreetMap file format) into an OSM API postgresql database

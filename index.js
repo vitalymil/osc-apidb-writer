@@ -4,7 +4,7 @@ const ApidbBulkWriter = require('./apidb-bulk-writer');
 
 const DEFAULT_BULK_SIZE = 3;
 
-class OscApidbWriter extends Writable {
+class OsmApidbWriter extends Writable {
     constructor(options = {}) {
         super({ objectMode: true });
 
@@ -42,4 +42,4 @@ class OscApidbWriter extends Writable {
     }
 }
 
-module.exports = OscApidbWriter;
+module.exports = OsmApidbWriter;
