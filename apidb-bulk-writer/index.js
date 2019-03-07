@@ -23,8 +23,8 @@ class ApidbBulkWriter {
 
         const pgStatements = [];
 
-        for (const action of require('./statement-creators')) {
-            await action(entitiesBulk, this._pgExecute, pgStatements);
+        for (const statemantCreator of require('./statement-creators')) {
+            await statemantCreator(entitiesBulk, this._pgExecute, pgStatements);
         }
 
         await this._writeStatements(pgStatements);
