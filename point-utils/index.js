@@ -13,8 +13,8 @@ function calculateMultiplicationFactor() {
 }
 
 function _calculateTile(lat, lon) {
-    const x = round((Number(lon) + 180) * 65535 / 360);
-    const y = round((Number(lat) + 90) * 65535 / 180);
+    const x = Math.round((Number(lon) + 180) * 65535 / 360);
+    const y = Math.round((Number(lat) + 90) * 65535 / 180);
     
     let tile = 0;
     
@@ -27,7 +27,7 @@ function _calculateTile(lat, lon) {
 }
 
 function _convertToFixed(coordinate) {
-    return round(Number(coordinate) * MULTIPLICATION_FACTOR);
+    return Math.round(Number(coordinate) * MULTIPLICATION_FACTOR);
 }
 
 module.exports = {

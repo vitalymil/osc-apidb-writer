@@ -1,30 +1,30 @@
 
-const pg = reuqire('pg');
+const pg = require('pg');
 
 class ApidbBulkWriter {
     constructor(pgConnectionProperties) {
-        this._inited = false;
         this._pool = new pg.Pool(pgConnectionProperties);
+        this._client = null;
     }
 
     get inited() {
-        return this._inited;
+        return !!this._client;
     }
 
     async initWrite() {
+        this._client = await this._pool.connect();
         await this._pgExecute('begin');
-        this._inited = true;
     }
 
     async writeEntitiesBulk(entitiesBulk) {
-        if (!this._inited) {
+        if (!this.inited) {
             throw new Error('ApidbBulkWriter cannot write, need to call initWrite method first');
         }
 
         const pgStatements = [];
 
         for (const statemantCreator of require('./statement-creators')) {
-            await statemantCreator(entitiesBulk, this._pgExecute, pgStatements);
+            await statemantCreator(entitiesBulk, this._pgExecute.bind(this), pgStatements);
         }
 
         await this._writeStatements(pgStatements);
@@ -32,7 +32,8 @@ class ApidbBulkWriter {
 
     async endWrite() {
         await this._pgExecute('commit');
-        this._inited = false;
+        await this._client.release();
+        this._client = null;
     }
 
     async _writeStatements(statements) {
@@ -40,14 +41,7 @@ class ApidbBulkWriter {
     }
 
     async _pgExecute(statement, parameters) {
-        const client = await this._pool.connect();
-
-        try {
-            return (await client.query(statement, parameters)).rows;
-        }
-        finally {
-            client.release();
-        }
+        return (await this._client.query(statement, parameters)).rows;
     }
 }
 

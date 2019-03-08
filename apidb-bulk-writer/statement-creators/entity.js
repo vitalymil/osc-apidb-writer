@@ -7,12 +7,13 @@ function _buildEntityInsert(entity, isCurrent) {
                         `current_${entity.type}s`:
                         `${entity.type}s`;
 
-    return `INSERT INTO ${tableName} (${entity.type}_id, 
+    return `INSERT INTO ${tableName} (
+                ${isCurrent ? '' : entity.type + '_'}id, 
                 timestamp, version, visible, 
                 changeset_id${entity.type === 'node' ? ', latitude, longitude, tile' : ''})
             VALUES
                 (${attrs.id}, to_timestamp('${attrs.timestamp}', 'YYYY-MM-DD"T"hh24:mi:ss"Z"'),
-                ${attrs.version}, ${attrs.visible}, ${attrs.changeset}
+                ${attrs.version}, ${entity.action !== 'delete'}, ${attrs.changeset}
                 ${entity.type === 'node' ? `, 
                     ${entity.computedAttributes.lat}, 
                     ${entity.computedAttributes.lon}, 
@@ -26,7 +27,7 @@ function _buildEntityCurrentUpdate(entity) {
             SET 
             version = ${attrs.version},
             timestamp = to_timestamp('${attrs.timestamp}', 'YYYY-MM-DD"T"hh24:mi:ss"Z"'), 
-            visible = ${attrs.visible}, changeset_id = ${attrs.changeset}
+            visible = ${entity.action !== 'delete'}, changeset_id = ${attrs.changeset}
             ${entity.type === 'node' ? `, latitude = ${entity.computedAttributes.lat}, 
                                           longitude = ${entity.computedAttributes.lon}, 
                                           tile = ${entity.computedAttributes.tile}` : ''}
@@ -36,9 +37,9 @@ function _buildEntityCurrentUpdate(entity) {
 module.exports = (entitiesBulk, _, pgStatements) => {
     for (const entity of entitiesBulk) {
         entity.computedAttributes = {
-            lat: pointUtils.convertToFixed(attrs.lat),
-            lon: pointUtils.convertToFixed(attrs.lon),
-            tile: pointUtils.calculateTile(attrs.lat, attrs.lon)
+            lat: pointUtils.convertToFixed(entity.attributes.lat),
+            lon: pointUtils.convertToFixed(entity.attributes.lon),
+            tile: pointUtils.calculateTile(entity.attributes.lat, entity.attributes.lon)
         };
 
         pgStatements.push(_buildEntityInsert(entity, false));

@@ -2,7 +2,7 @@
 module.exports = async (entitiesBulk, pgExecuteMethod, pgStatements) => {
     const uids = {};
     
-    for (const entity in entitiesBulk) {
+    for (const entity of entitiesBulk) {
         uids[entity.attributes.uid] = entity.attributes.user;
     }
 
@@ -19,8 +19,8 @@ module.exports = async (entitiesBulk, pgExecuteMethod, pgStatements) => {
                 display_name, data_public, description, home_lat, 
                 home_lon, home_zoom, nearby, pass_salt) 
             VALUES (${uid}, 'oscapidbw_user_${uid}@email.com', 
-                '00000000000000000000000000000000', NOW(), ${uids[uid]}, true,
-                ${uids[uid]}, 0, 0, 3, 50, '00000000')`
+                '00000000000000000000000000000000', NOW(), '${uids[uid]}', true,
+                '${uids[uid]}', 0, 0, 3, 50, '00000000')`
         )
     }
 }

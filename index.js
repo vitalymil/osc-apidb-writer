@@ -10,7 +10,7 @@ class OsmApidbWriter extends Writable {
 
         this._curBulk = [];
         this._bulkSize = options.bulkSize || DEFAULT_BULK_SIZE;
-        this._apidbWriter = new ApidbBulkWriter();
+        this._apidbWriter = new ApidbBulkWriter(options.pgConnectionProperties);
     }
 
     async _write(chunk, encoding, callback) {
