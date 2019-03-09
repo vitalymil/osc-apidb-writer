@@ -1,31 +1,61 @@
 
-function _buildTagsHistoryInsert(entity) {
-    const id = entity.attributes.id;
-    const version = entity.attributes.version;
-    const type = entity.type;
-    const tags = entity.tags;
+const MAX_PARAMETERS = 65500;
 
-    let statement = `INSERT INTO ${type}_tags (${type}_id, k, v, version) VALUES `;
+function _buildTagsInsertBulk(entitiesBulk, pgStatements, isHistory) {
+    let paramStatements = {};
 
-    for (const tag of tags) {
-        statement += `(${id}, '${tag.k}', '${tag.v}', ${version}),`;
+    for (const entity of entitiesBulk) {
+        if (entity.tags && entity.tags.length > 0 && entity.action !== 'delete') {
+            let paramStatement = paramStatements[entity.type];
+
+            if (paramStatement && 
+                paramStatement.parameters.length + 
+                    (entity.tags.length * (isHistory ? 4 : 3)) > MAX_PARAMETERS) 
+            {
+                paramStatement.statement = paramStatement.statement.slice(0, -1);
+                pgStatements.parameterized.push(paramStatement);
+                paramStatement = null;
+            }
+
+            if (!paramStatement) {
+                paramStatement = { 
+                    statement: `INSERT INTO ${!isHistory ? 'current_' : ''}${entity.type}_tags 
+                                (${entity.type}_id, k, v${isHistory ? ', version' : ''}) VALUES `,
+                    parameters: [],
+                };
+
+                paramStatements[entity.type] = paramStatement;
+            }
+
+            _buildTagsInsert(entity, paramStatement, isHistory);
+        }
     }
 
-    return statement.slice(0, -1);
+    for (const type in paramStatements) {
+        const paramStatement = paramStatements[type];
+        
+        if (paramStatement && paramStatement.parameters.length > 0) {
+            paramStatement.statement = paramStatement.statement.slice(0, -1);
+            pgStatements.parameterized.push(paramStatement);
+        }
+    }
 }
 
-function _buildTagsCurrentInsert(entity) {
+function _buildTagsInsert(entity, paramStatement, isHistory) {
     const id = entity.attributes.id;
-    const type = entity.type;
+    const version = entity.attributes.version;
     const tags = entity.tags;
 
-    let statement = `INSERT INTO current_${type}_tags (${type}_id, k, v) VALUES `;
-
     for (const tag of tags) {
-        statement += `(${id}, '${tag.k}', '${tag.v}'),`;
-    }
+        paramStatement.statement += 
+            isHistory ? `(?, ?, ?, ?),` : `(?, ?, ?),`;
 
-    return statement.slice(0, -1);
+        paramStatement.parameters.push(id, tag.k, tag.v);
+
+        if (isHistory) {
+            paramStatement.parameters.push(version);
+        }
+    }
 }
 
 function _buildTagsCurrentDelete(entity) {
@@ -36,12 +66,10 @@ function _buildTagsCurrentDelete(entity) {
 module.exports = (entitiesBulk, _, pgStatements) => {
     for (const entity of entitiesBulk) {
         if (entity.action && ['modify', 'delete'].includes(entity.action)) {
-            pgStatements.push(_buildTagsCurrentDelete(entity));
-        }
-
-        if (entity.tags && entity.tags.length > 0 && entity.action !== 'delete') {
-            pgStatements.push(_buildTagsHistoryInsert(entity));
-            pgStatements.push(_buildTagsCurrentInsert(entity));
+            pgStatements.regular.push(_buildTagsCurrentDelete(entity));
         }
     }
+
+    _buildTagsInsertBulk(entitiesBulk, pgStatements, true);
+    _buildTagsInsertBulk(entitiesBulk, pgStatements, false);
 }

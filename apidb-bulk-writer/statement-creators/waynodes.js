@@ -33,13 +33,15 @@ function _buildWayNodesCurrentDelete(entity) {
 
 module.exports = (entitiesBulk, _, pgStatements) => {
     for (const entity of entitiesBulk) {
-        if (entity.action && ['modify', 'delete'].includes(entity.action)) {
-            pgStatements.push(_buildWayNodesCurrentDelete(entity));
-        }
+        if (entity.type === 'way') {
+            if (entity.action && ['modify', 'delete'].includes(entity.action)) {
+                pgStatements.regular.push(_buildWayNodesCurrentDelete(entity));
+            }
 
-        if (entity.nds && entity.nds.length > 0 && entity.action !== 'delete') {
-            pgStatements.push(_buildWayNodesHistoryInsert(entity));
-            pgStatements.push(_buildWayNodesCurrentInsert(entity));
+            if (entity.nds && entity.nds.length > 0 && entity.action !== 'delete') {
+                pgStatements.regular.push(_buildWayNodesHistoryInsert(entity));
+                pgStatements.regular.push(_buildWayNodesCurrentInsert(entity));
+            }
         }
     }
 }

@@ -36,19 +36,21 @@ function _buildEntityCurrentUpdate(entity) {
 
 module.exports = (entitiesBulk, _, pgStatements) => {
     for (const entity of entitiesBulk) {
-        entity.computedAttributes = {
-            lat: pointUtils.convertToFixed(entity.attributes.lat),
-            lon: pointUtils.convertToFixed(entity.attributes.lon),
-            tile: pointUtils.calculateTile(entity.attributes.lat, entity.attributes.lon)
-        };
+        if (entity.attributes.lat && entity.attributes.lon) {
+            entity.computedAttributes = {
+                lat: pointUtils.convertToFixed(entity.attributes.lat),
+                lon: pointUtils.convertToFixed(entity.attributes.lon),
+                tile: pointUtils.calculateTile(entity.attributes.lat, entity.attributes.lon)
+            };
+        }
 
-        pgStatements.push(_buildEntityInsert(entity, false));
+        pgStatements.regular.push(_buildEntityInsert(entity, false));
 
         if (entity.action && ['modify', 'delete'].includes(entity.action)) {
-            pgStatements.push(_buildEntityCurrentUpdate(entity));
+            pgStatements.regular.push(_buildEntityCurrentUpdate(entity));
         }
         else {
-            pgStatements.push(_buildEntityInsert(entity, true));
+            pgStatements.regular.push(_buildEntityInsert(entity, true));
         }
     }
 }

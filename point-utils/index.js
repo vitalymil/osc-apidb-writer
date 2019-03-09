@@ -13,14 +13,14 @@ function calculateMultiplicationFactor() {
 }
 
 function _calculateTile(lat, lon) {
-    const x = Math.round((Number(lon) + 180) * 65535 / 360);
-    const y = Math.round((Number(lat) + 90) * 65535 / 180);
+    const x = BigInt(Math.round((Number(lon) + 180) * 65535 / 360));
+    const y = BigInt(Math.round((Number(lat) + 90) * 65535 / 180));
+
+    let tile = 0n;
     
-    let tile = 0;
-    
-    for (let i = 15; i >= 0; i--) {
-        tile = (tile << 1) | ((x >> i) & 1);
-        tile = (tile << 1) | ((y >> i) & 1);
+    for (let i = 15n; i >= 0n; i--) {
+        tile = (tile << 1n) | ((x >> i) & 1n);
+        tile = (tile << 1n) | ((y >> i) & 1n);
     }
     
     return tile;

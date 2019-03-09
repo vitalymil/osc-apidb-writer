@@ -3,7 +3,7 @@ module.exports = async (entitiesBulk, pgExecuteMethod, pgStatements) => {
     const uids = {};
     
     for (const entity of entitiesBulk) {
-        uids[entity.attributes.uid] = entity.attributes.user;
+        uids[entity.attributes.uid || '-1'] = entity.attributes.user || 'osmapidbw_nouser';
     }
 
     const existingUsers = 
@@ -14,7 +14,7 @@ module.exports = async (entitiesBulk, pgExecuteMethod, pgStatements) => {
     }
 
     for (const uid in uids) {
-        pgStatements.push(
+        pgStatements.regular.push(
             `INSERT INTO users (id, email, pass_crypt, creation_time, 
                 display_name, data_public, description, home_lat, 
                 home_lon, home_zoom, nearby, pass_salt) 

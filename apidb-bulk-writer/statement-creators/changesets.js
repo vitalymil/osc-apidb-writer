@@ -13,7 +13,7 @@ module.exports = async (entitiesBulk, pgExecuteMethod, pgStatements) => {
     for (const entity of entitiesBulk) {
         changesetArray.push(entity.attributes.changeset);
         changesetUids[entity.attributes.changeset] = { 
-            uid: entity.attributes.uid, 
+            uid: entity.attributes.uid || '-1', 
             time: entity.attributes.timestamp 
         };
     }
@@ -27,7 +27,7 @@ module.exports = async (entitiesBulk, pgExecuteMethod, pgStatements) => {
     }
 
     for (const changeset of changesets) {
-        pgStatements.push(
+        pgStatements.regular.push(
             `INSERT INTO changesets
                 (id, user_id, created_at, min_lat, max_lat, min_lon, 
                 max_lon, closed_at, num_changes) 
@@ -36,6 +36,6 @@ module.exports = async (entitiesBulk, pgExecuteMethod, pgStatements) => {
                 to_timestamp('${changesetUids[changeset].time}', 'YYYY-MM-DD"T"hh24:mi:ss"Z"'), 
                 ${MIN_LAT}, ${MAX_LAT}, ${MIN_LON}, ${MAX_LON}, 
                 to_timestamp('${changesetUids[changeset].time}', 'YYYY-MM-DD"T"hh24:mi:ss"Z"'), 0)`
-        )
+        );
     }
 }
