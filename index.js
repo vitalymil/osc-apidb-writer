@@ -14,31 +14,41 @@ class OsmApidbWriter extends Writable {
     }
 
     async _write(chunk, encoding, callback) {
-        this._curBulk.push(chunk);
-        
-        if (this._curBulk.length === this._bulkSize) {
-            if (!this._apidbWriter.inited) {
-                await this._apidbWriter.initWrite();
+        try {
+            this._curBulk.push(chunk);
+            
+            if (this._curBulk.length === this._bulkSize) {
+                if (!this._apidbWriter.inited) {
+                    await this._apidbWriter.initWrite();
+                }
+
+                await this._apidbWriter.writeEntitiesBulk(this._curBulk);
+                this._curBulk = [];
             }
 
-            await this._apidbWriter.writeEntitiesBulk(this._curBulk);
-            this._curBulk = [];
+            callback();
         }
-
-        callback();
+        catch (error) {
+            callback(error);
+        }
     }
 
     async _final(callback) {
-        if (this._curBulk.length > 0) {
-            if (!this._apidbWriter.inited) {
-                await this._apidbWriter.initWrite();
+        try {
+            if (this._curBulk.length > 0) {
+                if (!this._apidbWriter.inited) {
+                    await this._apidbWriter.initWrite();
+                }
+
+                await this._apidbWriter.writeEntitiesBulk(this._curBulk);
             }
 
-            await this._apidbWriter.writeEntitiesBulk(this._curBulk);
+            await this._apidbWriter.endWrite();
+            callback();
         }
-
-        await this._apidbWriter.endWrite();
-        callback();
+        catch (error) {
+            callback(error);
+        }
     }
 }
 
