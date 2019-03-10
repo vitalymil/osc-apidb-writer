@@ -3,7 +3,11 @@ module.exports = async (entitiesBulk, pgExecuteMethod, pgStatements) => {
     const uids = {};
     
     for (const entity of entitiesBulk) {
-        uids[entity.attributes.uid || '-1'] = entity.attributes.user || 'osmapidbw_nouser';
+        const uid = entity.attributes.uid || '-1';
+        const user = entity.attributes.user && entity.attributes.uid ? 
+            entity.attributes.user : 
+            'anonymous';
+        uids[uid] = `osmapidbw_user_${uid} (${user})`;
     }
 
     const existingUsers = 

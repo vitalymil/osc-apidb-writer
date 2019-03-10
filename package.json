@@ -1,6 +1,6 @@
 {
   "name": "osm-apidb-writer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Module for writing OSC and OSM files (OpenStreetMap file format) into an OSM API postgresql database",
   "main": "index.js",
   "scripts": {
