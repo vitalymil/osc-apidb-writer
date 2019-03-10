@@ -3,7 +3,6 @@ const Writable = require('stream').Writable;
 const ApidbBulkWriter = require('./apidb-bulk-writer');
 
 const DEFAULT_BULK_SIZE = 10000;
-let bulksCount = 0;
 
 class OsmApidbWriter extends Writable {
     constructor(options = {}) {
@@ -23,7 +22,6 @@ class OsmApidbWriter extends Writable {
             }
 
             await this._apidbWriter.writeEntitiesBulk(this._curBulk);
-            bulksCount++;
             this._curBulk = [];
         }
 

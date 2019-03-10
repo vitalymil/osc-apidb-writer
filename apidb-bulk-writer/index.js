@@ -37,7 +37,6 @@ class ApidbBulkWriter {
         await this._pgExecute('commit');
         await this._client.release();
         this._client = null;
-        console.log(new Date().getTime());
     }
 
     async _writeStatements(statements) {
@@ -53,12 +52,7 @@ class ApidbBulkWriter {
     }
 
     async _pgExecute(statement, parameters) {
-        try {
-            return (await this._client.query(statement, parameters)).rows;
-        }
-        catch(e) {
-            console.log(e);
-        }
+        return (await this._client.query(statement, parameters)).rows;
     }
 }
 
