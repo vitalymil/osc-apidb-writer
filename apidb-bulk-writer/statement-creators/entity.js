@@ -1,14 +1,11 @@
 
 const pointUtils = require('../../point-utils');
 
-function _buildEntityInsert(entity, isCurrent) {
+function _buildEntityHistoryInsert(entity) {
     const attrs = entity.attributes;
-    const tableName = isCurrent ?
-                        `current_${entity.type}s`:
-                        `${entity.type}s`;
 
-    return `INSERT INTO ${tableName} (
-                ${isCurrent ? '' : entity.type + '_'}id, 
+    return `INSERT INTO ${entity.type}s (
+                ${entity.type}_id, 
                 timestamp, version, visible, 
                 changeset_id${entity.type === 'node' ? ', latitude, longitude, tile' : ''})
             VALUES
@@ -20,18 +17,27 @@ function _buildEntityInsert(entity, isCurrent) {
                     ${entity.computedAttributes.tile}` : ''})`;
 }
 
-function _buildEntityCurrentUpdate(entity) {
+function _buildEntityCurrentUpsert(entity) {
     const attrs = entity.attributes;
 
-    return `UPDATE current_${entity.type}s 
-            SET 
+    return `INSERT INTO current_${entity.type}s (
+                id, timestamp, version, visible, 
+                changeset_id${entity.type === 'node' ? ', latitude, longitude, tile' : ''})
+            VALUES
+                (${attrs.id}, to_timestamp('${attrs.timestamp}', 'YYYY-MM-DD"T"hh24:mi:ss"Z"'),
+                ${attrs.version}, ${entity.action !== 'delete'}, ${attrs.changeset}
+                ${entity.type === 'node' ? `, 
+                    ${entity.computedAttributes.lat}, 
+                    ${entity.computedAttributes.lon}, 
+                    ${entity.computedAttributes.tile}` : ''})
+            ON CONFLICT (id) DO UPDATE
+            SET
             version = ${attrs.version},
             timestamp = to_timestamp('${attrs.timestamp}', 'YYYY-MM-DD"T"hh24:mi:ss"Z"'), 
             visible = ${entity.action !== 'delete'}, changeset_id = ${attrs.changeset}
             ${entity.type === 'node' ? `, latitude = ${entity.computedAttributes.lat}, 
                                           longitude = ${entity.computedAttributes.lon}, 
-                                          tile = ${entity.computedAttributes.tile}` : ''}
-            WHERE id = ${attrs.id}`;
+                                          tile = ${entity.computedAttributes.tile}` : ''}`;
 }
 
 module.exports = (entitiesBulk, _, pgStatements) => {
@@ -44,13 +50,7 @@ module.exports = (entitiesBulk, _, pgStatements) => {
             };
         }
 
-        pgStatements.regular.push(_buildEntityInsert(entity, false));
-
-        if (entity.action && ['modify', 'delete'].includes(entity.action)) {
-            pgStatements.regular.push(_buildEntityCurrentUpdate(entity));
-        }
-        else {
-            pgStatements.regular.push(_buildEntityInsert(entity, true));
-        }
+        pgStatements.regular.push(_buildEntityHistoryInsert(entity));
+        pgStatements.regular.push(_buildEntityCurrentUpsert(entity));
     }
 }
