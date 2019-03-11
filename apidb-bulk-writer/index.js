@@ -9,6 +9,8 @@ class ApidbBulkWriter {
         else {
             this._pool = new pg.Pool(options.pgConnectionProperties);
         }
+
+        this._inited = false;
     }
 
     get inited() {
