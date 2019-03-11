@@ -12,7 +12,7 @@ class ApidbBulkWriter {
     }
 
     get inited() {
-        return !!this._client;
+        return this._inited;
     }
 
     async initWrite() {
@@ -21,6 +21,7 @@ class ApidbBulkWriter {
         }
 
         await this._pgExecute('begin');
+        this._inited = true;
     }
 
     async writeEntitiesBulk(entitiesBulk) {
@@ -44,6 +45,8 @@ class ApidbBulkWriter {
             await this._client.release();
             this._client = null;
         }
+
+        this._inited = false;
     }
 
     async _writeStatements(statements) {
