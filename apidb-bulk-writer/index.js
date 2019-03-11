@@ -2,9 +2,13 @@
 const pg = require('pg');
 
 class ApidbBulkWriter {
-    constructor(pgConnectionProperties) {
-        this._pool = new pg.Pool(pgConnectionProperties);
-        this._client = null;
+    constructor(options) {
+        if (options.pgClient) {
+            this._client = options.pgClient;
+        }
+        else {
+            this._pool = new pg.Pool(options.pgConnectionProperties);
+        }
     }
 
     get inited() {
@@ -12,7 +16,10 @@ class ApidbBulkWriter {
     }
 
     async initWrite() {
-        this._client = await this._pool.connect();
+        if (this._pool) {
+            this._client = await this._pool.connect();
+        }
+
         await this._pgExecute('begin');
     }
 
@@ -32,8 +39,11 @@ class ApidbBulkWriter {
 
     async endWrite() {
         await this._pgExecute('commit');
-        await this._client.release();
-        this._client = null;
+
+        if (this._pool) {
+            await this._client.release();
+            this._client = null;
+        }
     }
 
     async _writeStatements(statements) {
