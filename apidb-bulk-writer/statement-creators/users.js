@@ -37,6 +37,6 @@ module.exports = async (entitiesBulk, pgExecuteMethod, pgStatements) => {
 
     if (paramStatement.parameters.length > 0) {
         paramStatement.statement = paramStatement.statement.slice(0, -1);
-        pgStatements.parameterized.push(paramStatement);
+        pgStatements.push(paramStatement);
     }
 }

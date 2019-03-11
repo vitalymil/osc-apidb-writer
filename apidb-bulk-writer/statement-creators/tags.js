@@ -13,7 +13,7 @@ function _buildTagsInsertBulk(entitiesBulk, pgStatements, isHistory) {
                     (entity.tags.length * (isHistory ? 4 : 3)) > MAX_PARAMETERS) 
             {
                 paramStatement.statement = paramStatement.statement.slice(0, -1);
-                pgStatements.parameterized.push(paramStatement);
+                pgStatements.push(paramStatement);
                 paramStatement = null;
             }
 
@@ -33,10 +33,10 @@ function _buildTagsInsertBulk(entitiesBulk, pgStatements, isHistory) {
 
     for (const type in paramStatements) {
         const paramStatement = paramStatements[type];
-        
+
         if (paramStatement && paramStatement.parameters.length > 0) {
             paramStatement.statement = paramStatement.statement.slice(0, -1);
-            pgStatements.parameterized.push(paramStatement);
+            pgStatements.push(paramStatement);
         }
     }
 }
@@ -66,7 +66,7 @@ function _buildTagsCurrentDelete(entity) {
 module.exports = (entitiesBulk, _, pgStatements) => {
     for (const entity of entitiesBulk) {
         if (entity.action && ['modify', 'delete'].includes(entity.action)) {
-            pgStatements.regular.push(_buildTagsCurrentDelete(entity));
+            pgStatements.push(_buildTagsCurrentDelete(entity));
         }
     }
 

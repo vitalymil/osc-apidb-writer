@@ -50,7 +50,7 @@ module.exports = (entitiesBulk, _, pgStatements) => {
             };
         }
 
-        pgStatements.regular.push(_buildEntityHistoryInsert(entity));
-        pgStatements.regular.push(_buildEntityCurrentUpsert(entity));
+        pgStatements.push(_buildEntityHistoryInsert(entity));
+        pgStatements.push(_buildEntityCurrentUpsert(entity));
     }
 }

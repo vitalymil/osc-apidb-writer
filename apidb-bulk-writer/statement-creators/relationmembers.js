@@ -47,12 +47,12 @@ module.exports = (entitiesBulk, _, pgStatements) => {
     for (const entity of entitiesBulk) {
         if (entity.type === 'relation') {
             if (entity.action && ['modify', 'delete'].includes(entity.action)) {
-                pgStatements.regular.push(_buildRelationMembersCurrentDelete(entity));
+                pgStatements.push(_buildRelationMembersCurrentDelete(entity));
             }
 
             if (entity.members && entity.members.length > 0 && entity.action !== 'delete') {
-                pgStatements.regular.push(_buildRelationMembersHistoryInsert(entity));
-                pgStatements.regular.push(_buildRelationMembersCurrentInsert(entity));
+                pgStatements.push(_buildRelationMembersHistoryInsert(entity));
+                pgStatements.push(_buildRelationMembersCurrentInsert(entity));
             }
         }
     }

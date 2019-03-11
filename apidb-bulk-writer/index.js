@@ -21,10 +21,7 @@ class ApidbBulkWriter {
             throw new Error('ApidbBulkWriter cannot write, need to call initWrite method first');
         }
 
-        const pgStatements = {
-            regular: [],
-            parameterized: [],
-        };
+        const pgStatements = [];
 
         for (const statemantCreator of require('./statement-creators')) {
             await statemantCreator(entitiesBulk, this._pgExecute.bind(this), pgStatements);
@@ -40,14 +37,28 @@ class ApidbBulkWriter {
     }
 
     async _writeStatements(statements) {
-        await this._pgExecute(statements.regular.reduce((acc, cur) => acc + cur + ';\n', ''));
+        const currentBulk = '';
 
-        for (const paramStatement of statements.parameterized) {
-            let paramsCount = 0;
-            await this._pgExecute(
-                paramStatement.statement
-                    .replace(/\?/g, () => `$${++paramsCount}`),
-                    paramStatement.parameters);
+        for (const statement of statements) {
+            if (statement.parameters) {
+                if (currentBulk.length > 0) {
+                    await this._pgExecute(currentBulk);
+                    currentBulk = '';
+                }
+
+                let paramsCount = 0;
+                await this._pgExecute(
+                    statement.statement
+                        .replace(/\?/g, () => `$${++paramsCount}`),
+                        statement.parameters);
+            }
+            else {
+                currentBulk += statement + ';\n';
+            }
+        }
+
+        if (currentBulk.length > 0) {
+            await this._pgExecute(currentBulk);
         }
     }
 
