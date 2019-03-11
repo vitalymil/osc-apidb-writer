@@ -37,7 +37,7 @@ class ApidbBulkWriter {
     }
 
     async _writeStatements(statements) {
-        const currentBulk = '';
+        let currentBulk = '';
 
         for (const statement of statements) {
             if (statement.parameters) {
