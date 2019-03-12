@@ -41,10 +41,10 @@ class ApidbBulkWriter {
     }
 
     async endWrite() {
-        await this._pgExecute('commit');
-
         if (this._pool) {
+            await this._pgExecute('commit');
             await this._client.release();
+            
             this._client = null;
         }
 
