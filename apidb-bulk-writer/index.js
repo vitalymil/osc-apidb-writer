@@ -4,7 +4,9 @@ const pg = require('pg');
 class ApidbBulkWriter {
     constructor(options) {
         if (options.pgClient) {
-            this._client = options.pgClient;
+            this._client = {
+                query: options.queryMethod,
+            };
         }
         else {
             this._pool = new pg.Pool(options.pgConnectionProperties);
